@@ -7,6 +7,7 @@ import 'posthog.dart';
 import 'posthog_event.dart';
 import 'posthog_flutter_platform_interface.dart';
 import 'replay/mask/posthog_text_mask.dart';
+import 'surveys/survey_builder.dart';
 import 'util/logging.dart';
 
 /// Callback to intercept and modify events before they are sent to PostHog.
@@ -319,6 +320,14 @@ class PostHogConfig {
   /// Use [Posthog.getFeatureFlag] or [Posthog.isFeatureEnabled] within this
   /// callback to access the loaded flag values.
   OnFeatureFlagsCallback? onFeatureFlags;
+
+  /// Builds a custom survey UI in place of the default bottom sheet. Return
+  /// `null` from it to show the default UI for a survey.
+  ///
+  /// Applies to surveys the SDK renders (popover surveys on iOS and Android).
+  /// Targeting, event triggers, branching, partial responses and survey events
+  /// are still handled by the SDK; the builder only replaces the UI.
+  PostHogSurveyBuilder? surveyBuilder;
 
   /// Whether to automatically register this device's push token or Firebase
   /// Installation ID (FID) with PostHog.

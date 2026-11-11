@@ -209,6 +209,7 @@ class PosthogFlutterIO extends PosthogFlutterPlatformInterface {
     }
 
     _onFeatureFlagsCallback = config.onFeatureFlags;
+    SurveyService().surveyBuilder = config.surveyBuilder;
     _pushIdentityProvider = config.pushIdentityProvider;
     _beforeSendCallbacks = config.beforeSend;
 

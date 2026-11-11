@@ -7,6 +7,7 @@ import '../posthog_observer.dart';
 import 'models/posthog_display_survey.dart';
 import 'models/survey_callbacks.dart';
 import 'models/survey_appearance.dart';
+import 'survey_builder.dart';
 import 'widgets/survey_bottom_sheet.dart';
 
 /// How long to wait before showing a survey.
@@ -43,6 +44,9 @@ class SurveyService {
   Completer<bool>? _pendingShow;
   Timer? _popupDelayTimer;
   PostHogDisplaySurvey? _delayedSurvey;
+
+  /// Custom survey UI set from [PostHogConfig.surveyBuilder].
+  PostHogSurveyBuilder? surveyBuilder;
 
   /// Shows a survey using the PosthogObserver context
   Future<void> showSurvey(
@@ -157,7 +161,8 @@ class SurveyService {
               });
             }
           }
-          return _buildSurveyWidget(survey, onShown, onResponse, (survey) {
+          return _buildSurveyWidget(context, survey, onShown, onResponse,
+              (survey) {
             if (_programmaticDismissal != programmaticDismissal) {
               return;
             }
@@ -185,11 +190,26 @@ class SurveyService {
 
   /// Builds the survey widget
   Widget _buildSurveyWidget(
+    BuildContext context,
     PostHogDisplaySurvey survey,
     OnSurveyShown onShown,
     OnSurveyResponse onResponse,
     OnSurveyClosed onClosed,
   ) {
+    final builder = surveyBuilder;
+    if (builder != null) {
+      final controller = PostHogSurveyController(
+        survey: survey,
+        onShown: onShown,
+        onResponse: onResponse,
+        onClose: () {
+          onClosed(survey);
+          Navigator.of(context).pop();
+        },
+      );
+      final custom = builder(context, controller);
+      if (custom != null) return custom;
+    }
     return SurveyBottomSheet(
       survey: survey,
       onShown: onShown,
